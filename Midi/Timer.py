@@ -1,38 +1,11 @@
 import tkinter as tk
+import Midi
 from tkinter import ttk, Toplevel
 import random
 from pygame import mixer
 import time
 
-
-mixer.init()
-
-class MidiEvent():
-    def __init__(self, event) -> None:
-        self.status = event[0][0]
-        self.note = event[0][1]
-        self.velocity = event[0][2]
-
-class MidiAction():
-    def __init__(self, name:str) -> None:
-        self.name = name
-        self.allowed_midi_statuses:list[int]|None
-        self.allowed_midi_notes:list[int]|None
-        self.allowed_midi_velocities:list[int]|None
-
-    def verify(self, event:MidiEvent) -> bool:
-        if self.allowed_midi_statuses != None and event.status not in self.allowed_midi_statuses:
-            return False
-        if self.allowed_midi_notes != None and event.note not in self.allowed_midi_notes:
-            return False
-        if self.allowed_midi_velocities != None and event.velocity not in self.allowed_midi_velocities:
-            return False
-        return True
-
-    def action(self, event:MidiEvent) -> None:
-        pass
-
-class Timer(MidiAction):
+class Timer(Midi.MidiAction):
     def __init__(self, window:tk.Tk) -> None:
         super().__init__("timer")
         
@@ -62,13 +35,13 @@ class Timer(MidiAction):
 
         self.window.protocol("WM_DELETE_WINDOW", self.window.withdraw)
     
-    def action(self, event:MidiEvent) -> None:
+    def action(self, event:Midi.MidiEvent) -> None:
         if event.note == 74:
             self.__handleKnob(event)
         if event.note == 118:
             self.__handleButton(event)
     
-    def __handleKnob(self, event:MidiEvent) -> None:
+    def __handleKnob(self, event:Midi.MidiEvent) -> None:
         self.window.deiconify()
         if self.timerRunning:
             return None
@@ -76,7 +49,7 @@ class Timer(MidiAction):
         self.progressbar["value"] = self.timeValue
         self.label["text"] = self.__convertTimeValueToString(self.timeValue)
 
-    def __handleButton(self, event:MidiEvent) -> None:
+    def __handleButton(self, event:Midi.MidiEvent) -> None:
         if self.timerRunning:
             self.window.withdraw()
             return None
