@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, Toplevel
 import random
 from pygame import mixer
+import time
+
 
 mixer.init()
 
@@ -54,7 +56,7 @@ class Timer(MidiAction):
         self.label.pack(pady=10)
 
         self.progressbar = ttk.Progressbar(self.window, length=400)
-        self.progressbar["maximum"] = 90
+        self.progressbar["maximum"] = 90 * 60
         self.progressbar["value"] = 45
         self.progressbar.pack(padx=20, pady=20)
 
@@ -75,27 +77,25 @@ class Timer(MidiAction):
         self.label["text"] = self.__convertTimeValueToString(self.timeValue)
 
     def __handleButton(self, event:MidiEvent) -> None:
-        self.window.withdraw()
         if self.timerRunning:
+            self.window.withdraw()
             return None
         if self.timeValue == 0:
             mixer.pause()
             return None
         self.timerRunning = True
+        self.timeValue -= 60
         self.progressbar["maximum"] = self.timeValue
         self.window.after(0, self.__timerTick)
 
-    def __convertTimeValueToString(self, velocity:int) -> str:
-        if velocity >= 60:
-            if velocity-60 >= 10:
-                return f"01:{velocity-60}"
-            return f"01:0{velocity-60}"
-        if velocity >= 10:
-            return f"00:{velocity}"
-        return f"00:0{velocity}"
+    def __convertTimeValueToString(self, value:int) -> str:
+        if self.timerRunning:
+            return time.strftime("%H:%M:%S", time.gmtime(value))
+        return time.strftime("%H:%M", time.gmtime(value))
+            
     
     def __midiVelocityToTimeValue(self, velocity:int) -> int:
-        return round(velocity / 127 * self.maxTime)
+        return round(velocity / 127 * self.maxTime * 60)
     
     def __timerTick(self) -> None:
         self.timeValue -= 1
@@ -104,10 +104,10 @@ class Timer(MidiAction):
         self.window.update_idletasks()
 
         if self.timeValue > 0:
-            self.window.after(60000, self.__timerTick)
+            self.window.after(1000, self.__timerTick)
         else:
             self.timerRunning = False
-            self.progressbar["maximum"] = 90
+            self.progressbar["maximum"] = 90 * 60
             self.__timerSound()
 
     def __timerSound(self) -> None:
