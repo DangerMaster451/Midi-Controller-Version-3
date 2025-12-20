@@ -69,6 +69,7 @@ class Handler(BaseHTTPRequestHandler):
             with open("html/clicked.html", "rb") as file:
                 content = file.read()
                 self.wfile.write(content)
+            self.controller.currentCommand = "toggle"
 
         else:
             self.send_response(200)
