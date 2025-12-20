@@ -3,31 +3,6 @@ import tkinter as tk
 import threading
 import Midi
 
-PORT = 8000
-CURRENT_COMMAND:str = "None"
-
-class Server(threading.Thread):
-    def __init__(self, host, port, gui, queue):
-        threading.Thread.__init__(self)
-        self.host = host
-        self.port = port
-        self.gui = gui
-        self.queue = queue
-        self.daemon = True
-
-    def run(self):
-        print(f"Listening on http://{self.host}:{self.port}\n")
-        server = HTTPServer((self.host, self.port), Handler)
-        server.serve_forever()
-
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Contest-type", "text/plain")
-        self.end_headers()
-        self.wfile.write(CURRENT_COMMAND.encode("utf-8"))
-        print("GET!")
-
 class MediaController(Midi.MidiAction):
     def __init__(self, window:tk.Tk) -> None:
         super().__init__("Media Controller")
@@ -43,8 +18,40 @@ class MediaController(Midi.MidiAction):
 
         self.__window.protocol("WM_DELETE_WINDOW", self.__window.withdraw)
 
-        server = Server("localhost", 8000, None, None)
+        self.currentCommand:str = "None"
+
+        server = Server("", 8000, self)
         server.start()
 
     def action(self, event:Midi.MidiEvent) -> None:
-        print("toggle media playback")
+        if self.currentCommand == "None":
+            self.currentCommand = "pause"
+            print("pausing... (hopefully)")
+
+class Server(threading.Thread):
+    def __init__(self, host, port, controller:MediaController):
+        threading.Thread.__init__(self)
+        self.host = host
+        self.port = port
+        self.daemon = True
+        self.controller = controller
+        
+    def run(self):
+        def handler(*args):
+            return Handler(self.controller, *args)
+        print(f"Listening on http://{self.host}:{self.port}\n")
+        server = HTTPServer((self.host, self.port), handler)
+        server.serve_forever()
+
+class Handler(BaseHTTPRequestHandler):
+    def __init__(self, controller:MediaController, *args):
+        self.controller = controller
+        BaseHTTPRequestHandler.__init__(self, *args)
+
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Contest-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(self.controller.currentCommand.encode("utf-8"))
+        print(f"GET: command:{self.controller.currentCommand}")
+        self.controller.currentCommand = "None"
