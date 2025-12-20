@@ -51,8 +51,49 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
     def do_GET(self):
-        self.send_response(200)
-        self.send_header("Contest-type", "text/plain")
-        self.end_headers()
-        self.wfile.write(self.controller.currentCommand.encode("utf-8"))
-        self.controller.currentCommand = "None"
+        if self.path == "/controller":
+            self.send_response(200)
+            self.send_header("Contest-type", "text/html")
+            self.end_headers()
+
+            html = """
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Quick Test</title>
+                </head>
+                <body>
+                    <h1>Quick Test</h1>
+                    <form action="/clicked" method="get">
+                        <button type="submit">Click Me!</button>
+                    </form>
+                </body>
+            </html>
+            """ 
+            
+            self.wfile.write(html.encode('utf-8'))
+        elif self.path == "/clicked?":
+            self.send_response(200)
+            self.send_header("Contest-type", "text/html")
+            self.end_headers()
+
+            html = """
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Quick Test</title>
+                </head>
+                <body>
+                    <h1>Thanks for clicking my button :)</h1>
+                </body>
+            </html>
+            """ 
+            self.wfile.write(html.encode('utf-8'))
+
+        else:
+            self.send_response(200)
+            self.send_header("Contest-type", "text/plain")
+            self.end_headers()
+
+            self.wfile.write(self.controller.currentCommand.encode("utf-8"))
+            self.controller.currentCommand = "None"
