@@ -6,8 +6,8 @@ from pygame import mixer
 import time
 
 class Timer(Midi.MidiAction):
-    def __init__(self, window:tk.Tk) -> None:
-        super().__init__("timer")
+    def __init__(self, window:tk.Tk, config:Midi.Config) -> None:
+        super().__init__("timer", config)
         
         self.allowed_midi_statuses:list[int]|None = [176]
         self.allowed_midi_notes:list[int]|None = [74, 118]
@@ -18,8 +18,8 @@ class Timer(Midi.MidiAction):
         self.timeValue:int = 45
         self.timerRunning:bool = False
 
-        self.__EASAlarm = mixer.Sound("sounds/EAS.mp3")
-        self.__normalAlarm = mixer.Sound("sounds/lofiAlarm.mp3")
+        self.__EASAlarm = mixer.Sound(config.EAS_sound_location)
+        self.__normalAlarm = mixer.Sound(config.normal_sound_location)
 
         self.window = tk.Toplevel(window)
         self.window.title("Timer")

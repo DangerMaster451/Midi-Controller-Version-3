@@ -1,4 +1,5 @@
 from pygame import midi, mixer
+import json
 
 mixer.init()
 midi.init()
@@ -12,7 +13,7 @@ class MidiEvent():
         self.velocity = event[0][2]
 
 class MidiAction():
-    def __init__(self, name:str) -> None:
+    def __init__(self, name:str, config:Config) -> None:
         self.name = name
         self.allowed_midi_statuses:list[int]|None
         self.allowed_midi_notes:list[int]|None
@@ -55,3 +56,12 @@ def logMidiEvent(event:MidiEvent, listBox, success:bool):
         listBox.itemconfig(listBox.size()-1, {"fg":"Green"})
     else:
         listBox.itemconfig(listBox.size()-1, {"fg":"Red"})
+
+class Config():
+    def __init__(self, file_path:str):
+        with open(file_path) as file:
+            data = json.loads(file.read())
+            self.server_ip = data["server-ip"]
+            self.server_port = data["server-port"]
+            self.EAS_sound_location = data["EAS-sound-location"]
+            self.normal_sound_location = data["normal-sound-location"]

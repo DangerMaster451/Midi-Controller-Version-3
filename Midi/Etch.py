@@ -3,8 +3,8 @@ import Midi
 import turtle
 
 class Etch(Midi.MidiAction):
-    def __init__(self, window:tk.Tk) -> None:
-        super().__init__("Etch-A-Sketch")
+    def __init__(self, window:tk.Tk, config:Midi.Config) -> None:
+        super().__init__("Etch-A-Sketch", config)
         
         self.allowed_midi_statuses:list[int]|None = [176]
         self.allowed_midi_notes:list[int]|None = [75, 76]
