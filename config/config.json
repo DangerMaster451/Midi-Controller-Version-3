@@ -2,5 +2,6 @@
     "server-ip":"http://192.168.4.205",
     "server-port":"8000",
     "EAS-sound-location":"sounds/EAS.mp3",
-    "normal-sound-location":"sounds/lofiAlarm.mp3"
+    "normal-sound-location":"sounds/lofiAlarm.mp3",
+    "fail-threshold": 10
 }

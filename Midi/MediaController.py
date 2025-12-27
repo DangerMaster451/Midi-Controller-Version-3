@@ -1,7 +1,7 @@
 import tkinter as tk
 import requests
+import threading
 import Midi
-
 
 class MediaController(Midi.MidiAction):
     def __init__(self, window:tk.Tk, config:Midi.Config) -> None:
@@ -14,29 +14,54 @@ class MediaController(Midi.MidiAction):
         self.window = window
         self.url = f"{config.server_ip}:{config.server_port}"
 
+        self.fails = 0
+        self.failThreshold = config.failThreshold
+        self.givenUp = False
+        
     def action(self, event:Midi.MidiEvent) -> None:
-        try:
-            if event.status == 176 and event.note == 64 and event.velocity == 0:
-                r = requests.get(f"{self.url}/togglePlayback")
-            elif event.status == 144 and event.note == 49:
-                r = requests.get(f"{self.url}/prevTab")
-            elif event.status == 144 and event.note == 51:
-                r = requests.get(f"{self.url}/nextTab")
-            elif event.status == 153 and event.note == 36:
-                r = requests.get(f"{self.url}/hotkey1")
-            elif event.status == 153 and event.note == 37:
-                r = requests.get(f"{self.url}/hotkey2")
-            elif event.status == 153 and event.note == 38:
-                r = requests.get(f"{self.url}/hotkey3")
-            elif event.status == 153 and event.note == 39:
-                r = requests.get(f"{self.url}/hotkey4")
-            elif event.status == 153 and event.note == 40:
-                r = requests.get(f"{self.url}/hotkey5")
-            elif event.status == 153 and event.note == 41:
-                r = requests.get("f{self.url}/hotkey6")
-            elif event.status == 153 and event.note == 42:
-                r = requests.get(f"{self.url}/hotkey7")
-            elif event.status == 153 and event.note == 43:
-                r = requests.get(f"{self.url}/hotkey8")
-        except:
-            pass
+        if self.givenUp:
+            return None
+        if event.status == 176 and event.note == 64 and event.velocity == 0:
+            self.sendRequest("/togglePlayback")
+        elif event.status == 144 and event.note == 49:
+            self.sendRequest("/prevTab")
+        elif event.status == 144 and event.note == 51:
+            self.sendRequest("/nextTab")
+        elif event.status == 153 and event.note == 36:
+            self.sendRequest("/hotkey1")
+        elif event.status == 153 and event.note == 37:
+            self.sendRequest("/hotkey2")
+        elif event.status == 153 and event.note == 38:
+            self.sendRequest("/hotkey3")
+        elif event.status == 153 and event.note == 39:
+            self.sendRequest("/hotkey4")
+        elif event.status == 153 and event.note == 40:
+            self.sendRequest("/hotkey5")
+        elif event.status == 153 and event.note == 41:
+            self.sendRequest("/hotkey6")
+        elif event.status == 153 and event.note == 42:
+            self.sendRequest("/hotkey7")
+        elif event.status == 153 and event.note == 43:
+            self.sendRequest("/hotkey8")
+        return None
+
+    def sendRequest(self, page:str):
+        def thread():
+            print(f"Making request to {page}...")
+            while True:
+                try:
+                    r = requests.get(f"{self.url}/{page}")
+                    print("Success")
+                    self.fails = 0
+                    break
+                except requests.exceptions.ConnectTimeout:
+                    print(f"Failed to make request, trying {self.failThreshold - self.fails} more times...")
+                    self.fails += 1
+                if self.fails >= self.failThreshold:
+                    self.givenUp = True
+                    print("I've given up :'(")
+                    break
+            print("Thread Complete")
+
+        t = threading.Thread(target=thread)
+        t.start()

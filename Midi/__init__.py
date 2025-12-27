@@ -31,6 +31,9 @@ class MidiAction():
     def action(self, event:MidiEvent) -> None:
         pass
 
+    async def asyncAction(self, event:MidiEvent) -> None:
+        pass
+
 def createMidiEvents(window, listBox, MidiActions) -> None:
     if midi_input.poll():   
         for event in midi_input.read(5):
@@ -65,4 +68,4 @@ class Config():
             self.server_port = data["server-port"]
             self.EAS_sound_location = data["EAS-sound-location"]
             self.normal_sound_location = data["normal-sound-location"]
-            self.govee_api = data["govee-api-key"]
+            self.failThreshold = data["fail-threshold"]
