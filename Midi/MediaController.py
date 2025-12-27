@@ -1,3 +1,4 @@
+from typing import Literal
 import tkinter as tk
 import requests
 import threading
@@ -11,12 +12,21 @@ class MediaController(Midi.MidiAction):
         self.allowed_midi_notes:list[int]|None = [64, 49, 51, 36, 37, 38, 39, 40, 41, 42, 43, 70, 71]
         self.allowed_midi_velocities:list[int]|None = None
 
-        self.window = window
+        self.__window = tk.Toplevel(window)
+        self.__window.title("Server Connection Monitor")
+        self.__window.geometry("500x500")
+
+        self.listBox = tk.Listbox(self.__window, height=300, width=50)
+        self.listBox.yview()
+        self.listBox.pack(pady=10)
+
         self.url = f"{config.server_ip}:{config.server_port}"
 
         self.fails = 0
         self.failThreshold = config.failThreshold
         self.givenUp = False
+
+        self.__window.withdraw()
         
     def action(self, event:Midi.MidiEvent) -> None:
         if self.givenUp:
@@ -44,24 +54,36 @@ class MediaController(Midi.MidiAction):
         elif event.status == 153 and event.note == 43:
             self.sendRequest("/hotkey8")
         return None
+    
+    def log(self, message:str, type:Literal["INFO", "WARNING", "ERROR"]):
+        self.__window.deiconify()
+        self.listBox.insert(self.listBox.size(), message)
+        self.listBox.see(self.listBox.size())
+        if type == "INFO":
+            self.listBox.itemconfig(self.listBox.size()-1, {"fg":"black"})
+        elif type == "WARNING":
+            self.listBox.itemconfig(self.listBox.size()-1, {"fg":"#ED9121"})
+        elif type == "ERROR":
+            self.listBox.itemconfig(self.listBox.size()-1, {"fg":"red"})
 
-    def sendRequest(self, page:str):
+    def sendRequest(self, page):
         def thread():
-            print(f"Making request to {page}...")
+            self.log(f"Making request to {page}...", "INFO")
             while True:
                 try:
                     r = requests.get(f"{self.url}/{page}")
-                    print("Success")
+                    self.log(f"Success", "INFO")
                     self.fails = 0
                     break
                 except requests.exceptions.ConnectTimeout:
-                    print(f"Failed to make request, trying {self.failThreshold - self.fails} more times...")
+                    print()
+                    self.log(f"Failed to make request, trying {self.failThreshold - self.fails} more times...", "WARNING")
                     self.fails += 1
                 if self.fails >= self.failThreshold:
                     self.givenUp = True
-                    print("I've given up :'(")
+                    self.log("I've Given Up :'(", "ERROR")
                     break
-            print("Thread Complete")
+            self.log("Thread Complete", "INFO")
 
         t = threading.Thread(target=thread)
         t.start()
