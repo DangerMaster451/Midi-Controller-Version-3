@@ -14,7 +14,7 @@ listBox = tk.Listbox(window, height=300, width=50)
 listBox.yview()
 listBox.pack(pady=10)
 
-MidiActions = [Timer.Timer(window, config), Etch.Etch(window, config), MediaController.MediaController(window, config)]
+MidiActions = [Timer.Timer(window, config), Etch.Etch(window, config), MediaController.MediaController(window, config), Lights.Lights(window, config)]
 
 window.after(10, lambda: Midi.createMidiEvents(window, listBox, MidiActions))
 

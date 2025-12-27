@@ -65,3 +65,4 @@ class Config():
             self.server_port = data["server-port"]
             self.EAS_sound_location = data["EAS-sound-location"]
             self.normal_sound_location = data["normal-sound-location"]
+            self.govee_api = data["govee-api-key"]
