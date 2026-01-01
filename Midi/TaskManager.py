@@ -11,11 +11,11 @@ class TaskManager(Midi.MidiAction):
 
         self.__window = tk.Toplevel(window)
         self.__window.title("Task Manager")
-        self.__window.geometry("300x200")
+        self.__window.minsize(300, 200)
         self.__window.resizable(False, False)
         self.__window.withdraw()
 
-        self.__label = tk.Label(self.__window, text="Hello World", anchor=tk.CENTER)
+        self.__label = tk.Label(self.__window, text="TODAY", anchor=tk.CENTER)
         self.__label.pack(pady=10)
 
         self.__inputFrame = tk.Frame(self.__window, borderwidth=5, relief="groove")
@@ -30,8 +30,6 @@ class TaskManager(Midi.MidiAction):
 
         self.__submitInput = tk.Button(self.__inputFrame, command=self.__newItem, text="↵", borderwidth=0)
         self.__submitInput.grid(row=0, column=1)
-
-
 
         self.__window.protocol("WM_DELETE_WINDOW", self.__window.withdraw)
 
