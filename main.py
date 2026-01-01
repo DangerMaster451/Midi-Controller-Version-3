@@ -1,5 +1,5 @@
 import Midi
-from Midi import Timer, Etch, MediaController
+from Midi import Timer, Etch, MediaController, TaskManager
 import tkinter as tk
 from tkinter import ttk
 
@@ -14,7 +14,7 @@ listBox = tk.Listbox(window, height=300, width=50)
 listBox.yview()
 listBox.pack(pady=10)
 
-MidiActions = [Timer.Timer(window, config), Etch.Etch(window, config), MediaController.MediaController(window, config)]
+MidiActions = [Timer.Timer(window, config), Etch.Etch(window, config), MediaController.MediaController(window, config), TaskManager.TaskManager(window, config)]
 
 window.after(10, lambda: Midi.createMidiEvents(window, listBox, MidiActions))
 
