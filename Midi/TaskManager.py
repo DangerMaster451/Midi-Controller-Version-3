@@ -1,5 +1,21 @@
 import Midi
 import tkinter as tk
+from datetime import timedelta, date
+
+class CalendarDay(tk.Frame):
+    def __init__(self, root:tk.Frame, index:int):
+        super().__init__(root, width=100, height=380, borderwidth=5, relief="groove")
+        self.grid(row=0, column=index, padx=2, pady=5, sticky="n")
+        self.pack_propagate(False)
+
+        text = (date.today() + timedelta(days=index)).strftime("%m-%d")
+
+        self.__label = tk.Label(self, text=text, anchor="n")
+        self.__label.pack(pady=2)
+
+class CalendarEvent():
+    def __init__(self):
+        pass
 
 class TaskManager(Midi.MidiAction):
     def __init__(self, window:tk.Tk, config:Midi.Config) -> None:
@@ -17,14 +33,14 @@ class TaskManager(Midi.MidiAction):
         self.__window.withdraw()
         
         # setup todo section
-        self.__todoFrame = tk.Frame(self.__window, width=300, height=400, borderwidth=5, relief="groove")
+        self.__todoFrame = tk.Frame(self.__window, width=200, height=400, borderwidth=5, relief="groove")
         self.__todoFrame.grid(row=0, column=0, padx=10, pady=10, sticky="n")
         self.__todoFrame.grid_propagate(False)
 
         self.__label = tk.Label(self.__todoFrame, text="TODAY", anchor="w")
         self.__label.pack(pady=10)
 
-        self.__tasksFrame = tk.Frame(self.__todoFrame, height=300, width=250, borderwidth=0)
+        self.__tasksFrame = tk.Frame(self.__todoFrame, height=300, width=150, borderwidth=0)
         self.__tasksFrame.pack()
         self.__tasksFrame.pack_propagate(False)
 
@@ -45,22 +61,11 @@ class TaskManager(Midi.MidiAction):
         self.__calendarFrame.grid_rowconfigure(0)
         self.__calendarFrame.grid_columnconfigure(0)
         self.__calendarFrame.grid(row=0, column=1, padx=10, pady=10, sticky="n")
-        #self.__calendarFrame.grid_propagate(False)
 
-        self.day1Frame = tk.Frame(self.__calendarFrame, width=100, height=380, borderwidth=5, relief="groove")
-        self.day1Frame.grid(row=0, column=0, padx=2, pady=5, sticky="n")
+        self.__calendarDayFrames:list[CalendarDay] = []
         
-        self.day2Frame = tk.Frame(self.__calendarFrame, width=100, height=380, borderwidth=5, relief="groove")
-        self.day2Frame.grid(row=0, column=1, padx=2, pady=5, sticky="n")
-
-        self.day3Frame = tk.Frame(self.__calendarFrame, width=100, height=380, borderwidth=5, relief="groove")
-        self.day3Frame.grid(row=0, column=2, padx=2, pady=5, sticky="n")
-
-        self.day4Frame = tk.Frame(self.__calendarFrame, width=100, height=380, borderwidth=5, relief="groove")
-        self.day4Frame.grid(row=0, column=3, padx=2, pady=5, sticky="n")
-
-        self.day5Frame = tk.Frame(self.__calendarFrame, width=100, height=380, borderwidth=5, relief="groove")
-        self.day5Frame.grid(row=0, column=4, padx=2, pady=5, sticky="n")
+        for i in range(0,5):
+            self.__calendarDayFrames.append(CalendarDay(self.__calendarFrame, i))
         
 
         self.__window.protocol("WM_DELETE_WINDOW", self.__window.withdraw)
