@@ -1,6 +1,7 @@
 import Midi
 import tkinter as tk
 from datetime import timedelta, date
+from PIL import Image, ImageTk
 
 class CalendarDay(tk.Frame):
     def __init__(self, root:tk.Frame, index:int):
@@ -31,7 +32,13 @@ class TaskManager(Midi.MidiAction):
         self.__window.grid_rowconfigure(0, minsize=400)
         self.__window.grid_columnconfigure(0, minsize=200)
         self.__window.withdraw()
-        
+
+        # set background
+        background_image=ImageTk.PhotoImage(Image.open("assets/taskmanager_wallpaper.jpg").resize((1280,720)))
+        background_label = tk.Label(self.__window, image=background_image)
+        background_label.place(x=0, y=0, relwidth=1, relheight=1)
+        background_label.image = background_image #type: ignore
+
         # setup todo section
         self.__todoFrame = tk.Frame(self.__window, width=200, height=400, borderwidth=5, relief="groove")
         self.__todoFrame.grid(row=0, column=0, padx=10, pady=10, sticky="n")
@@ -67,7 +74,6 @@ class TaskManager(Midi.MidiAction):
         for i in range(0,5):
             self.__calendarDayFrames.append(CalendarDay(self.__calendarFrame, i))
         
-
         self.__window.protocol("WM_DELETE_WINDOW", self.__window.withdraw)
 
     def action(self, event:Midi.MidiEvent) -> None:
